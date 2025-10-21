@@ -1,0 +1,1 @@
+# rails-girls-cali-2025-workshop-proposal
