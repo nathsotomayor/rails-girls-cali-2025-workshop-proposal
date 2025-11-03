@@ -69,19 +69,16 @@ $ rails --version
 Rails 8.2.0
 ```
 
-### Creando la Aplicación
+### Sobre el Comando `rails new`
 
-Rails viene con varios comandos para facilitar la vida. `rails new` genera los cimientos de una aplicación Rails nueva para ti.
-
+Rails incluye el comando `rails new` que genera los cimientos de una aplicación Rails nueva. Normalmente lo usarías así:
 ```bash
 $ rails new mi_tienda
 ```
 
-Después de que tu nueva aplicación sea creada, cambia a su directorio:
+Este comando crea toda la estructura de directorios, archivos de configuración y dependencias necesarias para una nueva aplicación Rails.
 
-```bash
-$ cd mi_tienda
-```
+Sin embargo, para este tutorial **no vamos a usar este comando** porque comenzaremos con un proyecto ya creado que tiene la estructura básica configurada.
 
 ### Estructura Básica de Directorios
 
