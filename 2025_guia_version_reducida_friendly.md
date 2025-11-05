@@ -1749,6 +1749,137 @@ Nota que usamos `render :new` (no `redirect_to`). **Render** muestra la misma vi
 
 También establecemos el estado HTTP en `422 Unprocessable Entity` (Entidad No Procesable). Es un código que le dice al navegador: "Recibí los datos pero no pude procesarlos porque tienen errores".
 
+### 💬 Mensajes de Confirmación: ¡Hablándole al Usuario!
+
+¿Alguna vez has comprado algo en línea y después de hacer clic en "Comprar", aparece un mensaje verde que dice "¡Tu pedido ha sido confirmado!"? O cuando te registras en un sitio web y ves "¡Bienvenida! Tu cuenta ha sido creada". Esos mensajes son súper importantes porque le confirman al usuario que su acción fue exitosa.
+
+**Sin esos mensajes, ¿cómo sabríamos si algo funcionó?** Imagina hacer clic en "Guardar" y... nada. La página cambia pero no sabes si se guardó o no. ¡Sería confuso y frustrante! 😰
+
+Por eso las aplicaciones profesionales siempre le hablan al usuario. Y Rails tiene una herramienta perfecta para esto: **el Flash**.
+
+#### ¿Qué es el Flash? ⚡
+
+El **Flash** es como una **nota adhesiva temporal** que le pasas al usuario. Imagina esto:
+
+1. El usuario crea un producto
+2. El controller guarda el producto en la base de datos
+3. Antes de redirigir, el controller pega una "nota adhesiva" que dice "¡Producto creado exitosamente!"
+4. El usuario es redirigido a otra página
+5. Esa página detecta la nota adhesiva y la muestra
+6. **Después de mostrarla una vez, la nota desaparece** ✨
+
+Es **temporal** - aparece solo una vez y luego se borra automáticamente. No se queda ahí molestando para siempre.
+
+El [Flash](https://api.rubyonrails.org/classes/ActionDispatch/Flash.html) proporciona una forma de pasar datos temporales entre actions del controller. Cualquier cosa que coloques en el flash estará disponible para la siguiente action y luego se limpiará.
+
+#### Los Dos Tipos de Mensajes 📬
+
+El flash típicamente se usa para dos tipos de mensajes:
+
+**✅ Notice (Avisos Positivos)**
+Son mensajes de confirmación cuando algo salió bien:
+- "Producto creado exitosamente"
+- "Cambios guardados"
+- "Bienvenido de vuelta"
+
+Piensa en ellos como una palmadita en la espalda. 🎉
+
+**⚠️ Alert (Alertas y Advertencias)**
+Son mensajes cuando algo salió mal o requiere atención:
+- "No tienes permiso para hacer eso"
+- "Debes iniciar sesión primero"
+- "El producto no pudo ser eliminado"
+
+Son como una luz amarilla de precaución. 🚨
+
+#### Agregando un Mensaje de Confirmación a Nuestro Controller
+
+¿Recuerdas nuestra action `create` que guardaba productos? Actualmente, cuando guardamos un producto exitosamente, solo redirigimos al usuario:
+
+```ruby
+redirect_to @product
+```
+
+Esto funciona, pero no le dice nada al usuario. ¡Agreguemos un mensaje de confirmación! Modifica tu `create` action en `app/controllers/products_controller.rb` así:
+
+```ruby
+def create
+  @product = Product.new(product_params)
+  if @product.save
+    redirect_to @product, notice: "Product created successfully!"
+  else
+    render :new, status: :unprocessable_entity
+  end
+end
+```
+
+¿Ves lo que agregamos? 👀
+
+```ruby
+redirect_to @product, notice: "Product created successfully!"
+```
+
+Esto le dice a Rails: "Redirige al usuario a la página del producto Y establece un mensaje flash de tipo 'notice' con el texto 'Product created successfully!'"
+
+El argumento `notice:` es un atajo conveniente. También podrías escribir `flash[:notice] = "..."` pero Rails nos da esta forma más corta y elegante. ✨
+
+#### Mostrando los Mensajes en Nuestro Layout 🎨
+
+Perfecto, ahora el controller está creando el mensaje... ¡pero nadie lo está mostrando! Es como escribir una carta y no enviarla. 📮
+
+Necesitamos decirle a nuestras vistas: "Oye, si hay un mensaje flash, muéstralo".
+
+¿Pero en qué vista lo ponemos? ¿En `show.html.erb`? ¿En `new.html.erb`? ¿En todas? 🤔
+
+Aquí viene algo cool: recuerda que dijimos que hay una carpeta `app/views/layouts/`? El **layout** es como la plantilla maestra de tu aplicación. Es el marco que rodea TODAS tus páginas.
+
+Piénsalo como el marco de un cuadro:
+- El marco (layout) es siempre el mismo
+- El contenido del cuadro (tus vistas) cambia
+
+Si pones el flash en el layout, ¡automáticamente aparecerá en TODAS las páginas! Súper eficiente. 🎯
+
+Abre el archivo `app/views/layouts/application.html.erb` y busca el `<body>`. Justo después de la etiqueta de apertura `<body>`, agrega esto:
+
+```erb
+<html>
+  <!-- ... -->
+  <body>
+    <div class="notice"><%= flash[:notice] %></div>
+    <div class="alert"><%= flash[:alert] %></div>
+
+    <%= yield %>
+  </body>
+</html>
+```
+
+Vamos a entender qué hace cada línea:
+
+**`<div class="notice"><%= flash[:notice] %></div>`**
+- Crea un div (una caja) con la clase CSS "notice"
+- `<%= flash[:notice] %>` muestra el contenido del mensaje tipo notice (si existe)
+- Si no hay mensaje, simplemente no muestra nada
+
+**`<div class="alert"><%= flash[:alert] %></div>`**
+- Lo mismo, pero para mensajes de tipo alert (advertencias)
+
+💡 **¿Por qué ponemos ambos?** Porque diferentes acciones pueden crear diferentes tipos de mensajes. Cuando creas un producto, usas `notice` (positivo). Pero cuando eliminas algo o hay un error, podrías usar `alert` (advertencia). Al poner ambos en el layout, estamos preparados para cualquier situación.
+
+#### ¡Veamos el Resultado! 🎉
+
+Ahora, cuando crees un producto:
+
+1. El controller lo guarda en la base de datos ✅
+2. Establece el mensaje flash "¡Producto creado exitosamente!" 💬
+3. Redirige a la página del producto 🔀
+4. El layout detecta el flash y lo muestra en un div con clase "notice" 📺
+5. ¡El usuario ve su mensaje de confirmación! 😊
+6. Si recarga la página, el mensaje desaparece (ya cumplió su propósito) 👋
+
+Tu aplicación ahora se siente más profesional y le habla al usuario. Es como agregar buenos modales - pequeños detalles que hacen una gran diferencia. ✨
+
+💡 **¿Quieres profundizar más sobre el Flash?** Puedes aprender más sobre todas sus funcionalidades en la [Descripción General de Action Controller](https://guides.rubyonrails.org/action_controller_overview.html#the-flash). Pero por ahora, ¡ya sabes lo esencial para crear aplicaciones que se comunican con sus usuarios!
+
 ### ✏️ Editando Products (¡La Letra U de CRUD!)
 
 Ya podemos crear productos, ¡excelente! Pero ¿qué pasa si cometimos un error en el nombre y queremos corregirlo? Ahí es donde entra la **U** de CRUD (Update - Actualizar).
@@ -1782,7 +1913,7 @@ class ProductsController < ApplicationController
   def create
     @product = Product.new(product_params)
     if @product.save
-      redirect_to @product
+      redirect_to @product, notice: "Product created successfully!"
     else
       render :new, status: :unprocessable_entity
     end
@@ -1795,7 +1926,7 @@ class ProductsController < ApplicationController
   def update
     @product = Product.find(params[:id])
     if @product.update(product_params)
-      redirect_to @product
+      redirect_to @product, notice: "Product updated successfully!"
     else
       render :edit, status: :unprocessable_entity
     end
@@ -1951,7 +2082,7 @@ class ProductsController < ApplicationController
   def create
     @product = Product.new(product_params)
     if @product.save
-      redirect_to @product
+      redirect_to @product, notice: "Product created successfully!"
     else
       render :new, status: :unprocessable_entity
     end
@@ -1962,7 +2093,7 @@ class ProductsController < ApplicationController
 
   def update
     if @product.update(product_params)
-      redirect_to @product
+      redirect_to @product, notice: "Product updated successfully!"
     else
       render :edit, status: :unprocessable_entity
     end
@@ -2017,7 +2148,7 @@ class ProductsController < ApplicationController
   def create
     @product = Product.new(product_params)
     if @product.save
-      redirect_to @product
+      redirect_to @product, notice: "Product created successfully!"
     else
       render :new, status: :unprocessable_entity
     end
@@ -2028,7 +2159,7 @@ class ProductsController < ApplicationController
 
   def update
     if @product.update(product_params)
-      redirect_to @product
+      redirect_to @product, notice: "Product updated successfully!"
     else
       render :edit, status: :unprocessable_entity
     end
@@ -2036,7 +2167,7 @@ class ProductsController < ApplicationController
 
   def destroy
     @product.destroy
-    redirect_to products_path
+    redirect_to products_path, notice: "Product deleted successfully!"
   end
 
   private
