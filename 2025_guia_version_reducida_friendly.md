@@ -1084,18 +1084,22 @@ Si visitas `/blog/hello-world`, Rails captura `hello-world` como el parámetro `
 Para que CRUD funcione completamente en una aplicación web, necesitas **8 routes**. Suena como mucho, pero cada una tiene un propósito claro:
 
 **Para VER cosas (Read - Leer):**
+
 1. 📋 **Index** - Muestra TODOS los productos (lista completa)
 2. 👁️ **Show** - Muestra UN producto específico (detalles de uno solo)
 
 **Para CREAR cosas (Create - Crear):**
+
 3. 📝 **New** - Muestra el formulario para crear un producto nuevo
 4. ➕ **Create** - Procesa el formulario y guarda el producto en la base de datos
 
 **Para ACTUALIZAR cosas (Update - Actualizar):**
+
 5. ✏️ **Edit** - Muestra el formulario para editar un producto existente
 6. 🔄 **Update** - Procesa el formulario y actualiza el producto en la base de datos
 
 **Para ELIMINAR cosas (Delete - Eliminar):**
+
 7. 🗑️ **Destroy** - Elimina un producto de la base de datos
 
 Así se ven todas las routes juntas:
@@ -2325,6 +2329,9 @@ Abre `app/views/layouts/application.html.erb` y agrega una barra de navegación 
     </nav>
 
     <main>
+      <div class="notice"><%= flash[:notice] %></div>
+      <div class="alert"><%= flash[:alert] %></div>
+
       <%= yield %>
     </main>
   </body>
@@ -2588,12 +2595,8 @@ Ahora actualiza `app/views/products/show.html.erb` para usar estos nuevos estilo
   <%= image_tag @product.featured_image if @product.featured_image.attached? %>
 
   <section class="product-info">
-    <% cache @product do %>
-      <h1><%= @product.name %></h1>
-      <%= @product.description %>
-    <% end %>
-
-    <%= render "inventory", product: @product %>
+    <h1><%= @product.name %></h1>
+    <%= @product.description %>
 
     <% if authenticated? %>
       <%= link_to "Edit", edit_product_path(@product) %>
