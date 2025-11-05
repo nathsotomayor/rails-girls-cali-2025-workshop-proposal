@@ -1753,7 +1753,7 @@ Nota que usamos `render :new` (no `redirect_to`). **Render** muestra la misma vi
 
 También establecemos el estado HTTP en `422 Unprocessable Entity` (Entidad No Procesable). Es un código que le dice al navegador: "Recibí los datos pero no pude procesarlos porque tienen errores".
 
-### 💬 Mensajes de Confirmación: ¡Hablándole al Usuario!
+#### 💬 Mensajes de Confirmación: ¡Hablándole al Usuario!
 
 ¿Alguna vez has comprado algo en línea y después de hacer clic en "Comprar", aparece un mensaje verde que dice "¡Tu pedido ha sido confirmado!"? O cuando te registras en un sitio web y ves "¡Bienvenida! Tu cuenta ha sido creada". Esos mensajes son súper importantes porque le confirman al usuario que su acción fue exitosa.
 
